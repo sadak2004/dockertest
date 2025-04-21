@@ -1,4 +1,4 @@
-name: MinIO Remote Test
+name: MinIO Self-Hosted Test
 
 on:
   push:
@@ -8,6 +8,21 @@ jobs:
   minio-test:
     runs-on: ubuntu-latest
 
+    services:
+      minio:
+        image: minio/minio
+        ports:
+          - 9000:9000
+        env:
+          MINIO_ACCESS_KEY: minioadmin
+          MINIO_SECRET_KEY: minioadmin
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        command: server /data
+
     steps:
     - name: Install MinIO client
       run: |
@@ -15,18 +30,20 @@ jobs:
         chmod +x mc
         sudo mv mc /usr/local/bin/
 
-    - name: Setup MinIO alias (with remote URL)
-      run: |
-        mc alias set myminio http://localhost:9001 minioadmin minioadmin
+    - name: Wait for MinIO to be ready
+      run: sleep 10
 
-    - name: Make a bucket and upload a file
+    - name: Setup MinIO alias
+      run: mc alias set myminio http://localhost:9000 minioadmin minioadmin
+
+    - name: Create bucket and upload a file
       run: |
-        mc mb myminio/mybucket
+        mc mb myminio/test
         echo "Hello from GitHub Actions!" > test.txt
-        mc cp test.txt myminio/mybucket/
+        mc cp test.txt myminio/test/
 
-    - name: List files in bucket
+    - name: List files
       run: mc ls myminio/test/
 
-    - name: Remove file from bucket
+    - name: Delete file
       run: mc rm myminio/test/test.txt
