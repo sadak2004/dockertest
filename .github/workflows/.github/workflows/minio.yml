@@ -27,8 +27,8 @@ jobs:
 
     - name: Upload file to MinIO
       run: |
-        mc cp hello.txt myminio/my-bucket/hello.txt
+        mc cp hello.txt myminio/test/hello.txt
 
     - name: Remove file from MinIO
       run: |
-        mc rm myminio/my-bucket/hello.txt
+        mc rm myminio/test/hello.txt
