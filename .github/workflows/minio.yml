@@ -1,35 +1,32 @@
-name: MinIO Upload and Remove
+name: MinIO Remote Test
 
 on:
   push:
     branches: [main]
 
 jobs:
-  minio-job:
+  minio-test:
     runs-on: ubuntu-latest
 
-    # This tells GitHub to run your job inside this Docker container
-    container:
-      image: minio/mc
-
-    env:
-      MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
-      MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
-      MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
-
     steps:
-    - name: Setup MinIO alias
+    - name: Install MinIO client
       run: |
-        mc alias set myminio http://localhost:9001 my-access-key my-secret-key
+        curl -O https://dl.min.io/client/mc/release/linux-amd64/mc
+        chmod +x mc
+        sudo mv mc /usr/local/bin/
 
-    - name: Create a test file
+    - name: Setup MinIO alias (with remote URL)
       run: |
-        echo "Hello from GitHub Actions!" > hello.txt
+        mc alias set myminio http://localhost:9001 minioadmin minioadmin
 
-    - name: Upload to MinIO
+    - name: Make a bucket and upload a file
       run: |
-        mc cp hello.txt myminio/test/hello.txt
+        mc mb myminio/mybucket
+        echo "Hello from GitHub Actions!" > test.txt
+        mc cp test.txt myminio/mybucket/
 
-    - name: Remove from MinIO
-      run: |
-        mc rm myminio/test/hello.txt
+    - name: List files in bucket
+      run: mc ls myminio/test/
+
+    - name: Remove file from bucket
+      run: mc rm myminio/test/test.txt
