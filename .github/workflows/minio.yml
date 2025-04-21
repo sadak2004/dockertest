@@ -52,6 +52,12 @@ jobs:
         echo "File contents:"
         cat downloaded.txt
 
+    - name: Upload file as GitHub Actions artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-file
+        path: downloaded.txt
+
     - name: Delete file
       run: mc rm myminio/test/test.txt
     
