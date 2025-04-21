@@ -46,5 +46,12 @@ jobs:
     - name: List files
       run: mc ls myminio/test/
 
+    - name: Download and show contents of uploaded file
+      run: |
+        mc cp myminio/test/test.txt downloaded.txt
+        echo "File contents:"
+        cat downloaded.txt
+
+
     - name: Delete file
       run: mc rm myminio/test/test.txt
