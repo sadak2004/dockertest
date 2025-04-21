@@ -1,4 +1,4 @@
-name: MinIO Self-Hosted Test
+name: MinIO Standalone Test
 
 on:
   push:
@@ -8,30 +8,31 @@ jobs:
   minio-test:
     runs-on: ubuntu-latest
 
-    services:
-      minio:
-        image: minio/minio
-        ports:
-          - 9000:9000
-        env:
-          MINIO_ACCESS_KEY: minioadmin
-          MINIO_SECRET_KEY: minioadmin
-        options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        command: server /data
-
     steps:
+    - name: Install MinIO server
+      run: |
+        wget https://dl.min.io/server/minio/release/linux-amd64/minio
+        chmod +x minio
+        sudo mv minio /usr/local/bin/
+
+    - name: Start MinIO server in background
+      env:
+        MINIO_ROOT_USER: minioadmin
+        MINIO_ROOT_PASSWORD: minioadmin
+      run: |
+        mkdir -p ~/minio-data
+        nohup minio server ~/minio-data > minio.log 2>&1 &
+
+    - name: Wait for MinIO to be ready
+      run: |
+        sleep 10
+        curl -f http://localhost:9000/minio/health/live
+
     - name: Install MinIO client
       run: |
         curl -O https://dl.min.io/client/mc/release/linux-amd64/mc
         chmod +x mc
         sudo mv mc /usr/local/bin/
-
-    - name: Wait for MinIO to be ready
-      run: sleep 10
 
     - name: Setup MinIO alias
       run: mc alias set myminio http://localhost:9000 minioadmin minioadmin
