@@ -2,14 +2,15 @@ name: MinIO Upload and Remove
 
 on:
   push:
-    branches: [main] # or your branch name
+    branches: [main]
 
 jobs:
   minio-job:
     runs-on: ubuntu-latest
 
+    # This tells GitHub to run your job inside this Docker container
     container:
-      image: minio/mc # Docker container with MinIO client
+      image: minio/mc
 
     env:
       MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
@@ -17,18 +18,18 @@ jobs:
       MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
 
     steps:
-    - name: Set up MinIO alias
+    - name: Setup MinIO alias
       run: |
         mc alias set myminio $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
 
-    - name: Create test file
+    - name: Create a test file
       run: |
         echo "Hello from GitHub Actions!" > hello.txt
 
-    - name: Upload file to MinIO
+    - name: Upload to MinIO
       run: |
         mc cp hello.txt myminio/test/hello.txt
 
-    - name: Remove file from MinIO
+    - name: Remove from MinIO
       run: |
         mc rm myminio/test/hello.txt
