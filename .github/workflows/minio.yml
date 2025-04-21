@@ -52,5 +52,6 @@ jobs:
         echo "File contents:"
         cat downloaded.txt
 
-
+    - name: Delete file
+      run: mc rm myminio/test/test.txt
     
