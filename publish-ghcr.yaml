@@ -11,5 +11,5 @@ jobs:
       - name: Build and push the image 
         run: |
           docker login --username sadak2004 --password ${{ secrets.GH_PAT }} ghcr.io
-          docker build . --tag ghcr.io/sadak2004/helloworld:latest
-          docker push ghcr.io/sadak2004/helloworld:latest
+          docker build . --tag ghcr.io/sadak2004/sidddemodocker:latest
+          docker push ghcr.io/sadak2004/sidddemodocker:latest
